@@ -14,14 +14,23 @@
     <div>
 
         <div class="d-none d-md-flex table-title">
-          <div class="col-12 col-md-8"> Address </div>
+          <div class="col-12 col-md-8 d-flex">  
+              <span class="me-3"> Address </span>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" v-model="showOnlyFav" id="onlyfav">
+                <label class="form-check-label" for="onlyfav">
+                  Only Favorite
+                </label>
+              </div>
+
+          </div>
           <div class="col-12 col-md-2"> ETH </div>
-          <div class="col-12 col-md-2"> Is old </div>
+          <!-- <div class="col-12 col-md-2"> Is old </div> -->
+          <div class="col-12 col-md-2"> Action </div>
         </div>
 
        <Draggable
-        :list="wallets"
-        
+        :list="walletsToShow"
         item-key="wallet"
         class="list-group"
         ghost-class="ghost"
@@ -30,10 +39,17 @@
         @end="dragging = false"
       >
         <template #item="{ element }">
-          <div class="list-group-item d-flex flex-wrap" @click="setSelectedWallet(element)">
+          <div class="list-group-item d-flex flex-wrap draggableRow">
             <div class="col-12 col-md-8"> {{ element.address }} </div>
             <div class="col-12 col-md-2"> {{ (element.ethBalance).toFixed(2) }} </div>
-            <div class="col-12 col-md-2"> {{ element.isOld }} </div>
+            <!-- <div class="col-12 col-md-2"> {{ element.isOld }} </div> -->
+            <div class="col-12 col-md-2"> 
+              <StarIcon  class="actions-icons" v-if="!element.isFav" @click="changeFavState(element.address, !element.isFav)"/>
+              <FavIcon class="actions-icons" v-else @click="changeFavState(element.address, !element.isFav)" />
+
+              <SelectIcon class="actions-icons" v-if="wallet.address !== element.address" @click="setSelectedWallet(element)" />
+              <SelectedIcon class="actions-icons" v-else />
+            </div>
           </div>
         </template>
       </Draggable>
@@ -48,15 +64,35 @@
 <script>
 import API from '../services/API'
 import Draggable from "vuedraggable";
-import { mapActions } from 'pinia';
+import StarIcon from '../components/icons/StarIcon.vue';
+import FavIcon from '../components/icons/FavIcon.vue';
+import SelectIcon from '../components/icons/SelectIcon.vue';
+import SelectedIcon from '../components/icons/SelectedIcon.vue';
+import { mapActions, mapState } from 'pinia';
 import { useWallet } from '../stores/wallet'
+
 export default {
   data: () => ({
     wallets: [],
     walletToAdd: '',
+    showOnlyFav: false
   }),
   components: {
-    Draggable
+    Draggable,
+    StarIcon,
+    FavIcon,
+    SelectIcon,
+    SelectedIcon,
+  },
+  computed: {
+    ...mapState( useWallet, ['wallet']),
+    walletsToShow(){
+      if(this.showOnlyFav) {
+        return this.wallets.filter( wallet => wallet.isFav)
+      } else {
+        return this.wallets
+      }
+    }
   },
   methods: {
     ...mapActions(useWallet, ['setSelectedWallet']),
@@ -68,15 +104,11 @@ export default {
       const res = await API.addWallet(this.walletToAdd);
       this.wallets.push(res.data)
     },
-    // async addNewWallet( address ){
-    //   const res = await addWallet( address );
-    //   console.log(res.data)
-    // },
-    // async getWallets(){
-    //   const res = await getWallets();
-    //   console.log(res.data);
-    //   this.wallets = res.data
-    // },
+    async changeFavState(address, isFav) {
+      await API.switchFavState(address, isFav);
+      const walletIndex = this.wallets.findIndex( wallet => wallet.address === address);
+      this.wallets[walletIndex].isFav = isFav
+    }
   },
   created() {
     this.getWallets()
@@ -107,4 +139,13 @@ export default {
   border-radius: 5px;
 }
 
+.actions-icons{
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.draggableRow {
+  cursor: grab;
+}
 </style>

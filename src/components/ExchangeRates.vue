@@ -73,7 +73,7 @@ import { useWallet } from '../stores/wallet'
 import EditIcon from '../components/icons/IconEdit.vue';
 import CancelIcon from '../components/icons/CancelIcon.vue';
 import ConfirmIcon from '../components/icons/ConfirmIcon.vue';
-import API from '../services/api'
+import API from '../services/API'
 
 export default {
   data: () => ({
