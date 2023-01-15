@@ -99,10 +99,15 @@ export default {
   },
   methods: {
     async getExchangeRatesForETH(){
-      const res = await API.getExchangeRates()
-      this.rates = res.data;
-      this.currentRate = res.data.eth_usd;
-      this.newRate = res.data.eth_usd;
+      try {
+        const res = await API.getExchangeRates()
+        this.rates = res.data;
+        this.currentRate = res.data.eth_usd;
+        this.newRate = res.data.eth_usd;
+      } catch( e ) {
+        this.$toast.error(`Cannot get exchange rates, please try later`);
+      }
+      
     },
     setNewRate() {
       this.currentRate = this.newRate;

@@ -97,21 +97,36 @@ export default {
   methods: {
     ...mapActions(useWallet, ['setSelectedWallet']),
     async getWallets() {
-      const res = await API.getWallets()
-      this.wallets = res.data
+      try {
+        const res = await API.getWallets()
+        this.wallets = res.data;
+      } catch(e) {
+        this.$toast.error(`Something went wrong, please try later`);
+      }
     },
     async addWallet() {
-      const res = await API.addWallet(this.walletToAdd);
-      this.wallets.push(res.data)
+      try {
+        const res = await API.addWallet(this.walletToAdd);
+        this.wallets.push(res.data);
+        this.walletToAdd = '';
+      } catch( e ) {
+        const errorMessage = e.response?.data?.message;
+        this.$toast.error(`${ errorMessage || 'Something went wrong, please try later' }`);
+        this.walletToAdd = '';
+      }
     },
     async changeFavState(address, isFav) {
-      await API.switchFavState(address, isFav);
-      const walletIndex = this.wallets.findIndex( wallet => wallet.address === address);
-      this.wallets[walletIndex].isFav = isFav
+      try {
+        await API.switchFavState(address, isFav);
+        const walletIndex = this.wallets.findIndex( wallet => wallet.address === address);
+        this.wallets[walletIndex].isFav = isFav
+      } catch( e ){
+        this.$toast.error(`Something went wrong, please try later`);
+      }
     }
   },
   created() {
-    this.getWallets()
+    this.getWallets();
   }
 }
 </script>
