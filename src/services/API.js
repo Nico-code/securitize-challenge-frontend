@@ -4,21 +4,20 @@ class API{
 
   axiosInstance;
   constructor() {
-    // console.log(process.env.VUE_APP_API_URL)
-    this.axiosInstance = axios.create({ baseURL: 'http://localhost:4000'});
+    this.axiosInstance = axios.create({ baseURL: import.meta.env.VITE_API_KEY || 'http://localhost:3000'});
   }
 
   getWallets() {
-    return this.axiosInstance.get('http://localhost:3000/wallet')
+    return this.axiosInstance.get('/wallet')
   }
   addWallet(address) {
-    return this.axiosInstance.post(`http://localhost:3000/wallet/${address}`)
+    return this.axiosInstance.post(`/wallet/${address}`)
   }
   switchFavState(address, isFav) {
-    return this.axiosInstance.put(`http://localhost:3000/wallet/favorite/${address}`, {isFav})
+    return this.axiosInstance.put(`/wallet/favorite/${address}`, {isFav})
   }
   getExchangeRates() {
-    return this.axiosInstance.get('http://localhost:3000/exchange-rates/eth')
+    return this.axiosInstance.get('/exchange-rates/eth')
   }
 
   
